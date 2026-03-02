@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>x402 AI · Injective DeFi Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #05060F;
+      --surface:      #0A0C1C;
+      --card:         #0F1120;
+      --card-hover:   #141628;
+      --border:       #1A1D35;
+      --border-hi:    #252848;
+      --accent:       #00D4FF;
+      --accent-glow:  rgba(0, 212, 255, 0.18);
+      --accent-dim:   rgba(0, 212, 255, 0.10);
+      --purple:       #6C63FF;
+      --purple-dim:   rgba(108, 99, 255, 0.15);
+      --green:        #00E89E;
+      --green-dim:    rgba(0, 232, 158, 0.12);
+      --red:          #FF4D6A;
+      --yellow:       #FFB800;
+      --yellow-dim:   rgba(255, 184, 0, 0.10);
+      --text:         #DCE1F8;
+      --muted:        #525880;
+      --subtle:       #2E3155;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, #191C36 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -160px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 320px;
+      background: radial-gradient(ellipse, rgba(0,212,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ════════════════════════ HEADER ════════════════════════ */
+    header {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5, 6, 15, 0.85);
+      backdrop-filter: blur(16px);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 0 20px rgba(0,212,255,0.3);
+    }
+
+    .logo-copy h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      background: linear-gradient(90deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-copy small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .network-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 99px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,212,255,0.2);
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .network-pill::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* Shared pill style */
+    .bal-pill {
+      padding: 5px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border-hi);
+      background: var(--card);
+      font-size: 11px;
+      color: var(--muted);
+      display: none;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .bal-pill.show { display: block; }
+    .bal-pill.ok   { color: var(--green); border-color: rgba(0,232,158,0.3); }
+    .bal-pill.low  { color: var(--yellow); border-color: rgba(255,184,0,0.3); }
+
+    /* Wrap button — only visible when wallet connected */
+    #wrap-btn-header {
+      display: none;
+      padding: 6px 12px;
+      border-radius: 99px;
+      border: 1px solid rgba(255,184,0,0.4);
+      background: var(--yellow-dim);
+      color: var(--yellow);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    #wrap-btn-header.show { display: flex; align-items: center; gap: 5px; }
+    #wrap-btn-header:hover { background: rgba(255,184,0,0.18); border-color: var(--yellow); }
+
+    #wallet-btn {
+      padding: 7px 16px;
+      border-radius: 99px;
+      border: 1px solid var(--border-hi);
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    #wallet-btn:hover     { border-color: var(--accent); color: var(--accent); }
+    #wallet-btn.connected { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+    /* ════════════════════════ SUGGESTION CHIPS ════════════════════════ */
+    .chips-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: none;
+    }
+    .chips-bar::-webkit-scrollbar { display: none; }
+
+    .chip {
+      padding: 5px 13px;
+      border-radius: 99px;
+      border: 1px solid var(--border-hi);
+      background: var(--card);
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* ════════════════════════ CHAT ════════════════════════ */
+    #chat {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+    #chat::-webkit-scrollbar { width: 3px; }
+    #chat::-webkit-scrollbar-track { background: transparent; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex: 1;
+      gap: 16px;
+      padding: 40px 24px;
+      opacity: 0.75;
+    }
+    .welcome-icon { font-size: 52px; filter: drop-shadow(0 0 20px rgba(0,212,255,0.4)); }
+    .welcome h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome p { color: var(--muted); font-size: 14px; max-width: 400px; }
+
+    .welcome-steps { display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+    .step { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--subtle); }
+    .step-num {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1px solid var(--border-hi);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: var(--muted);
+    }
+
+    /* Messages */
+    .msg { display: flex; gap: 10px; animation: fadeUp 0.25s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px;
+    }
+    .msg.user .avatar { background: linear-gradient(135deg, var(--purple), #3B35BB); }
+    .msg.ai   .avatar { background: linear-gradient(135deg, #00A8CC, var(--green)); }
+    .msg.err  .avatar { background: rgba(255,77,106,0.2); }
+
+    .msg-body { max-width: 72%; display: flex; flex-direction: column; gap: 6px; }
+    .msg.user .msg-body { align-items: flex-end; }
+
+    .bubble { padding: 11px 15px; border-radius: 16px; line-height: 1.55; font-size: 13.5px; }
+    .msg.user .bubble {
+      background: linear-gradient(135deg, var(--purple) 0%, #4840C0 100%);
+      color: #fff; border-radius: 16px 4px 16px 16px;
+    }
+    .msg.ai .bubble {
+      background: var(--card); border: 1px solid var(--border-hi);
+      color: var(--text); border-radius: 4px 16px 16px 16px;
+    }
+    .msg.err .bubble {
+      background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.35);
+      color: var(--red); border-radius: 10px; font-size: 13px;
+    }
+    .bubble code {
+      background: rgba(0,212,255,0.1); padding: 1px 5px;
+      border-radius: 4px; font-family: monospace; font-size: 12px;
+    }
+
+    .receipt {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 7px 11px; border-radius: 8px;
+      background: var(--green-dim); border: 1px solid rgba(0,232,158,0.25);
+      font-size: 11px; color: var(--green);
+    }
+    .receipt a { color: var(--green); text-decoration: none; font-family: monospace; font-size: 10.5px; opacity: 0.8; }
+    .receipt a:hover { opacity: 1; text-decoration: underline; }
+
+    .typing-dots { display: flex; align-items: center; gap: 4px; padding: 13px 16px; }
+    .typing-dots span {
+      width: 5px; height: 5px; border-radius: 50%; background: var(--muted);
+      animation: dotBounce 1.3s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: translateY(0);   opacity: 0.35; }
+      40%           { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ════════════════════════ PAYMENT OVERLAY ════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 6, 15, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .pay-card {
+      background: var(--card);
+      border: 1px solid var(--border-hi);
+      border-radius: 22px;
+      padding: 36px 32px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      box-shadow: 0 0 60px rgba(0,212,255,0.12), 0 24px 48px rgba(0,0,0,0.5);
+    }
+    .pay-spinner {
+      width: 52px; height: 52px;
+      border: 3px solid var(--border-hi); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .pay-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .pay-card p  { font-size: 12.5px; color: var(--muted); }
+    .pay-amount {
+      margin-top: 18px; padding: 10px 20px; border-radius: 10px;
+      background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.3);
+      font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px;
+    }
+    .pay-sub { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
+    /* ════════════════════════ WRAP MODAL ════════════════════════ */
+    .wrap-card {
+      background: var(--card);
+      border: 1px solid var(--border-hi);
+      border-radius: 22px;
+      padding: 28px 28px 24px;
+      max-width: 400px;
+      width: 92%;
+      box-shadow: 0 0 60px rgba(255,184,0,0.08), 0 24px 48px rgba(0,0,0,0.5);
+    }
+
+    .wrap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .wrap-header h3 { font-size: 16px; font-weight: 700; }
+    .wrap-close {
+      width: 28px; height: 28px; border-radius: 8px;
+      border: 1px solid var(--border-hi); background: var(--surface);
+      color: var(--muted); font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .wrap-close:hover { border-color: var(--red); color: var(--red); }
+
+    /* Balance row inside modal */
+    .wrap-balances {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .wrap-bal-item { flex: 1; }
+    .wrap-bal-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .wrap-bal-value { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .wrap-bal-item.usdt  .wrap-bal-value { color: var(--text); }
+    .wrap-bal-item.wusdt .wrap-bal-value { color: var(--green); }
+    .wrap-arrow {
+      font-size: 18px; color: var(--muted); flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 8px; width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .wrap-arrow:hover { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+
+    /* Amount input */
+    .wrap-input-label {
+      font-size: 11px; color: var(--muted); margin-bottom: 6px; display: flex;
+      align-items: center; justify-content: space-between;
+    }
+    .wrap-input-row {
+      display: flex; gap: 8px; align-items: center;
+      margin-bottom: 18px;
+    }
+    #wrap-amount-input {
+      flex: 1; padding: 11px 14px;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 12px; color: var(--text); font-size: 16px;
+      font-family: inherit; font-weight: 500; outline: none;
+      transition: border-color 0.2s;
+    }
+    #wrap-amount-input:focus { border-color: var(--yellow); }
+    #wrap-amount-input::placeholder { color: var(--subtle); font-weight: 400; font-size: 14px; }
+    .max-btn {
+      padding: 9px 14px; border-radius: 10px;
+      border: 1px solid var(--border-hi); background: var(--surface);
+      color: var(--muted); font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .max-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* Wrap step indicators */
+    .wrap-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+    .wrap-step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 12.5px; color: var(--muted);
+      transition: all 0.2s;
+    }
+    .wrap-step.active {
+      border-color: var(--yellow); color: var(--text);
+      background: var(--yellow-dim);
+    }
+    .wrap-step.done   { border-color: rgba(0,232,158,0.3); color: var(--green); background: var(--green-dim); }
+    .wrap-step.error  { border-color: rgba(255,77,106,0.3); color: var(--red); background: rgba(255,77,106,0.08); }
+
+    .step-icon { font-size: 15px; flex-shrink: 0; }
+    .step-main { flex: 1; }
+    .step-sub  { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+    .step-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,184,0,0.3); border-top-color: var(--yellow);
+      border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+      display: none;
+    }
+    .wrap-step.active .step-spinner { display: block; }
+
+    /* Do-wrap button */
+    #do-wrap-btn {
+      width: 100%; padding: 13px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--yellow) 0%, #FF9500 100%);
+      border: none; color: #000;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    #do-wrap-btn:hover:not(:disabled) { transform: scale(1.01); box-shadow: 0 4px 20px rgba(255,184,0,0.35); }
+    #do-wrap-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ════════════════════════ FOOTER / INPUT ════════════════════════ */
+    footer {
+      position: relative;
+      z-index: 20;
+      padding: 14px 24px 18px;
+      border-top: 1px solid var(--border);
+      background: rgba(5, 6, 15, 0.92);
+      backdrop-filter: blur(16px);
+      flex-shrink: 0;
+    }
+
+    #low-warn {
+      display: none; align-items: center; gap: 8px;
+      padding: 8px 14px; margin-bottom: 10px;
+      border-radius: 9px;
+      background: rgba(255,184,0,0.08); border: 1px solid rgba(255,184,0,0.3);
+      font-size: 12px; color: var(--yellow);
+    }
+    #low-warn.show { display: flex; }
+    #low-warn button {
+      margin-left: auto; padding: 4px 10px;
+      border-radius: 6px; border: 1px solid var(--yellow);
+      background: transparent; color: var(--yellow);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    #low-warn button:hover { background: var(--yellow); color: #000; }
+
+    .input-row { display: flex; gap: 10px; align-items: flex-end; }
+
+    #q-input {
+      flex: 1; padding: 11px 15px;
+      background: var(--card); border: 1px solid var(--border-hi);
+      border-radius: 13px; color: var(--text);
+      font-size: 13.5px; font-family: inherit;
+      resize: none; min-height: 46px; max-height: 110px;
+      outline: none; transition: border-color 0.2s; line-height: 1.5;
+    }
+    #q-input:focus   { border-color: var(--accent); }
+    #q-input::placeholder { color: var(--muted); }
+
+    #send-btn {
+      width: 46px; height: 46px; flex-shrink: 0;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+      border: none; color: #fff; font-size: 18px;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #send-btn:hover    { transform: scale(1.06); box-shadow: 0 4px 20px rgba(0,212,255,0.4); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .input-meta {
+      margin-top: 8px; display: flex; align-items: center;
+      justify-content: space-between; font-size: 11px; color: var(--subtle);
+    }
+    .cost-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 8px; border-radius: 5px;
+      background: var(--accent-dim); border: 1px solid rgba(0,212,255,0.2);
+      color: var(--accent); font-size: 10.5px; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HEADER ══════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">⚡</div>
+    <div class="logo-copy">
+      <h1>x402 AI</h1>
+      <small>Injective DeFi Intelligence</small>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="network-pill">Injective EVM</div>
+
+    <!-- USDT balance pill -->
+    <div id="usdt-pill" class="bal-pill" title="Native USDT balance">— USDT</div>
+
+    <!-- WUSDT balance pill -->
+    <div id="wusdt-pill" class="bal-pill" title="Wrapped USDT balance (used for x402 payments)">— WUSDT</div>
+
+    <!-- Wrap shortcut button (shown when wallet connected) -->
+    <button id="wrap-btn-header" onclick="openWrapModal()" title="Wrap USDT → WUSDT">
+      🔄 Wrap
+    </button>
+
+    <button id="wallet-btn" onclick="connectWallet()">🦊 Connect Wallet</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════ SUGGESTION CHIPS ══════════════════════════ -->
+<div class="chips-bar">
+  <button class="chip" onclick="suggest('What are the top perpetual markets on Injective right now?')">📊 Top markets</button>
+  <button class="chip" onclick="suggest('What is the current BTC-PERP price on Injective?')">₿ BTC price</button>
+  <button class="chip" onclick="suggest('Show me the ETH-PERP order book depth')">📖 ETH orderbook</button>
+  <button class="chip" onclick="suggest('What is the INJ-PERP funding rate?')">💸 INJ funding rate</button>
+  <button class="chip" onclick="suggest('Compare BTC-PERP and ETH-PERP prices')">⚖️ BTC vs ETH</button>
+  <button class="chip" onclick="suggest('Which Injective perp markets have the highest open interest?')">🔥 Open interest</button>
+  <button class="chip" onclick="suggest('What is the SOL-PERP mid price and best bid/ask?')">◎ SOL spread</button>
+</div>
+
+<!-- ══════════════════════════ CHAT ══════════════════════════ -->
+<main id="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-icon">🔮</div>
+    <h2>Ask anything about Injective markets</h2>
+    <p>Live on-chain data · Claude AI analysis · $0.01 WUSDT per query via x402</p>
+    <div class="welcome-steps">
+      <div class="step"><div class="step-num">1</div>Connect MetaMask on Injective EVM</div>
+      <div class="step"><div class="step-num">2</div>Wrap USDT → WUSDT (click 🔄 Wrap)</div>
+      <div class="step"><div class="step-num">3</div>Ask anything — pay as you go</div>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════ PAYMENT OVERLAY ══════════════════════════ -->
+<div id="pay-overlay" class="modal-overlay">
+  <div class="pay-card">
+    <div class="pay-spinner"></div>
+    <h3 id="overlay-title">Preparing payment…</h3>
+    <p id="overlay-desc">Please wait</p>
+    <div class="pay-amount">$0.01 WUSDT</div>
+    <p class="pay-sub">via EIP-3009 · settled on Injective EVM</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════ WRAP MODAL ══════════════════════════ -->
+<div id="wrap-modal" class="modal-overlay">
+  <div class="wrap-card">
+
+    <div class="wrap-header">
+      <h3 id="wrap-modal-title">🔄 Wrap USDT → WUSDT</h3>
+      <button class="wrap-close" onclick="closeWrapModal()">✕</button>
+    </div>
+
+    <!-- Live balances -->
+    <div class="wrap-balances">
+      <div class="wrap-bal-item usdt">
+        <div class="wrap-bal-label">USDT (native)</div>
+        <div class="wrap-bal-value" id="modal-usdt-bal">—</div>
+      </div>
+      <div class="wrap-arrow" onclick="toggleWrapDirection()" title="Switch direction">⇄</div>
+      <div class="wrap-bal-item wusdt">
+        <div class="wrap-bal-label">WUSDT (x402)</div>
+        <div class="wrap-bal-value" id="modal-wusdt-bal">—</div>
+      </div>
+    </div>
+
+    <!-- Amount -->
+    <div class="wrap-input-label">
+      <span id="wrap-amount-label">Amount to wrap</span>
+      <span id="wrap-avail" style="color:var(--muted)">Available: —</span>
+    </div>
+    <div class="wrap-input-row">
+      <input id="wrap-amount-input" type="number" placeholder="0.00" min="0" step="0.01" />
+      <button class="max-btn" onclick="setMaxAmount()">MAX</button>
+    </div>
+
+    <!-- Step indicators -->
+    <div class="wrap-steps">
+      <div id="wstep-1" class="wrap-step">
+        <span class="step-icon">①</span>
+        <div class="step-main">
+          <div id="wstep-1-title">Approve USDT spending</div>
+          <div class="step-sub" id="wstep-1-sub">Allow the WUSDT contract to pull your USDT</div>
+        </div>
+        <div class="step-spinner"></div>
+      </div>
+      <div id="wstep-2" class="wrap-step">
+        <span class="step-icon">②</span>
+        <div class="step-main">
+          <div id="wstep-2-title">Deposit → WUSDT</div>
+          <div class="step-sub" id="wstep-2-sub">Lock USDT, receive WUSDT 1:1</div>
+        </div>
+        <div class="step-spinner"></div>
+      </div>
+    </div>
+
+    <button id="do-wrap-btn" onclick="doAction()">Wrap USDT</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+<footer>
+  <div id="low-warn">
+    ⚠️ Low WUSDT balance — you need at least 0.01 WUSDT per query.
+    <button onclick="openWrapModal()">🔄 Wrap USDT</button>
+  </div>
+  <div class="input-row">
+    <textarea id="q-input" rows="1" placeholder="Ask about Injective prices, orderbooks, funding rates…"></textarea>
+    <button id="send-btn" onclick="handleSend()">↑</button>
+  </div>
+  <div class="input-meta">
+    <span><span class="cost-tag">$0.01 WUSDT</span> per query · x402 + EIP-3009 · no account needed</span>
+    <span>Enter ↵ send &nbsp;·&nbsp; Shift+Enter newline</span>
+  </div>
+</footer>
+
+<script>
+  // ─── Config & state ──────────────────────────────────────────────────────────
+  // wusdtName is the EIP-712 domain name of the deployed WUSDT contract.
+  // It MUST match the name passed to the WrappedToken constructor at deploy time.
+  // The server returns this from /config so there's a single source of truth.
+  let CFG  = { wusdtAddress: '0xfdd13887b73b868b87467a8d6480521d4ff82c4d', chainId: 1776, wusdtName: 'x402 Wrapped USDT' };
+  let addr = null;
+  let busy = false;
+
+  // Contract addresses
+  const USDT_ADDRESS = '0x88f7F2b685F9692caf8c478f5BADF09eE9B1Cc13'; // native USDT on Injective EVM
+
+  // ─── Direct Injective RPC ─────────────────────────────────────────────────────
+  // We read chain state directly (bypassing MetaMask's selected network) so that
+  // the wallet can stay on Ethereum for EIP-712 signing while balances still come
+  // from Injective EVM.
+  const INJECTIVE_RPC = 'https://sentry.evm-rpc.injective.network';
+  let _rpcId = 1;
+  async function injectiveRPC(method, params) {
+    const resp = await fetch(INJECTIVE_RPC, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', id: _rpcId++, method, params }),
+    });
+    const json = await resp.json();
+    if (json.error) throw new Error('Injective RPC: ' + json.error.message);
+    return json.result;
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────────
+  fetch('/config').then(r => r.json()).then(c => Object.assign(CFG, c));
+
+  // ─── Wallet ──────────────────────────────────────────────────────────────────
+  async function connectWallet() {
+    if (!window.ethereum) { alert('Please install MetaMask.\nhttps://metamask.io'); return; }
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      // Switch to Injective — MetaMask requires chainId match for EIP-712 signing.
+      await ensureInjective();
+
+      // Re-request accounts AFTER chain switch.
+      // MetaMask may have a different active/connected account on Injective
+      // than on Ethereum, which would explain why EIP-712 recovers a different signer.
+      const injAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      addr = injAccounts[0];
+      console.log('[x402] Connected on Injective. addr:', addr);
+
+      refreshWalletUI();
+      await Promise.all([refreshWusdtBalance(), refreshUsdtBalance()]);
+    } catch (e) {
+      if (e.code !== 4001) console.error('connectWallet:', e);
+    }
+  }
+
+  function refreshWalletUI() {
+    if (!addr) return;
+    const short = addr.slice(0, 6) + '…' + addr.slice(-4);
+    const btn   = document.getElementById('wallet-btn');
+    btn.textContent = '✅ ' + short;
+    btn.classList.add('connected');
+    document.getElementById('wusdt-pill').classList.add('show');
+    document.getElementById('usdt-pill').classList.add('show');
+    document.getElementById('wrap-btn-header').classList.add('show');
+  }
+
+  // ─── Balances ────────────────────────────────────────────────────────────────
+  // Use direct Injective RPC for reads so MetaMask network doesn't matter.
+  async function ethCall(to, data) {
+    return injectiveRPC('eth_call', [{ to, data }, 'latest']);
+  }
+
+  function balanceOfData(account) {
+    return '0x70a08231' + account.slice(2).padStart(64, '0');
+  }
+
+  async function refreshWusdtBalance() {
+    if (!addr) return 0n;
+    try {
+      const raw  = await ethCall(CFG.wusdtAddress, balanceOfData(addr));
+      const bal  = BigInt(raw);
+      const usd  = (Number(bal) / 1e6).toFixed(2);
+      const pill = document.getElementById('wusdt-pill');
+      pill.textContent = usd + ' WUSDT';
+      const warn = document.getElementById('low-warn');
+      if (bal < 10000n) {
+        pill.classList.add('low'); pill.classList.remove('ok');
+        warn.classList.add('show');
+      } else {
+        pill.classList.add('ok'); pill.classList.remove('low');
+        warn.classList.remove('show');
+      }
+      document.getElementById('modal-wusdt-bal').textContent = usd;
+      return bal;
+    } catch { return 0n; }
+  }
+
+  async function refreshUsdtBalance() {
+    if (!addr) return 0n;
+    try {
+      const raw = await ethCall(USDT_ADDRESS, balanceOfData(addr));
+      const bal = BigInt(raw);
+      const usd = (Number(bal) / 1e6).toFixed(2);
+      document.getElementById('usdt-pill').textContent = usd + ' USDT';
+      document.getElementById('modal-usdt-bal').textContent = usd;
+      if (wrapDirection === 'wrap') document.getElementById('wrap-avail').textContent = 'Available: ' + usd + ' USDT';
+      return bal;
+    } catch { return 0n; }
+  }
+
+  // ─── Wrap/Unwrap modal ─────────────────────────────────────────────────────
+  let wrapDirection = 'wrap'; // 'wrap' or 'unwrap'
+
+  async function openWrapModal() {
+    if (!addr) { await connectWallet(); if (!addr) return; }
+    await Promise.all([refreshUsdtBalance(), refreshWusdtBalance()]);
+    wrapDirection = 'wrap';
+    applyDirection();
+    resetWrapSteps();
+    document.getElementById('wrap-amount-input').value = '';
+    document.getElementById('do-wrap-btn').disabled = false;
+    document.getElementById('wrap-modal').classList.add('show');
+  }
+
+  function closeWrapModal() {
+    document.getElementById('wrap-modal').classList.remove('show');
+  }
+
+  function toggleWrapDirection() {
+    wrapDirection = wrapDirection === 'wrap' ? 'unwrap' : 'wrap';
+    applyDirection();
+    resetWrapSteps();
+    document.getElementById('wrap-amount-input').value = '';
+    document.getElementById('do-wrap-btn').disabled = false;
+  }
+
+  function applyDirection() {
+    const isWrap = wrapDirection === 'wrap';
+    document.getElementById('wrap-modal-title').textContent = isWrap ? '🔄 Wrap USDT → WUSDT' : '🔄 Unwrap WUSDT → USDT';
+    document.getElementById('wrap-amount-label').textContent = isWrap ? 'Amount to wrap' : 'Amount to unwrap';
+    document.getElementById('do-wrap-btn').textContent = isWrap ? 'Wrap USDT' : 'Unwrap WUSDT';
+    // Update available balance indicator
+    const usdtBal = document.getElementById('modal-usdt-bal').textContent;
+    const wusdtBal = document.getElementById('modal-wusdt-bal').textContent;
+    document.getElementById('wrap-avail').textContent = isWrap
+      ? 'Available: ' + usdtBal + ' USDT'
+      : 'Available: ' + wusdtBal + ' WUSDT';
+  }
+
+  async function setMaxAmount() {
+    if (wrapDirection === 'wrap') {
+      const bal = await refreshUsdtBalance();
+      document.getElementById('wrap-amount-input').value = (Number(bal) / 1e6).toFixed(6);
+    } else {
+      const bal = await refreshWusdtBalance();
+      document.getElementById('wrap-amount-input').value = (Number(bal) / 1e6).toFixed(6);
+    }
+  }
+
+  function resetWrapSteps() {
+    ['wstep-1', 'wstep-2'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('active', 'done', 'error');
+    });
+    if (wrapDirection === 'wrap') {
+      document.getElementById('wstep-1').style.display = '';
+      document.getElementById('wstep-1-title').textContent = 'Approve USDT spending';
+      document.getElementById('wstep-1-sub').textContent = 'Allow the WUSDT contract to pull your USDT';
+      document.getElementById('wstep-2-title').textContent = 'Deposit → WUSDT';
+      document.getElementById('wstep-2-sub').textContent = 'Lock USDT, receive WUSDT 1:1';
+    } else {
+      document.getElementById('wstep-1').style.display = 'none';
+      document.getElementById('wstep-2-title').textContent = 'Withdraw → USDT';
+      document.getElementById('wstep-2-sub').textContent = 'Burn WUSDT, receive USDT 1:1';
+    }
+  }
+
+  function setWrapStep(n, state, sub) {
+    const el = document.getElementById('wstep-' + n);
+    el.classList.remove('active', 'done', 'error');
+    if (state) el.classList.add(state);
+    if (sub) document.getElementById('wstep-' + n + '-sub').textContent = sub;
+  }
+
+  // ─── ABI encoding helpers (no viem needed) ───────────────────────────────────
+  function padHex(hex, bytes = 32) {
+    return hex.replace('0x', '').padStart(bytes * 2, '0');
+  }
+
+  function encodeCall(selector, ...args) {
+    // Each arg: bigint → uint256, or '0x...' string → address (padded to 32 bytes)
+    return selector + args.map(a =>
+      typeof a === 'bigint'
+        ? a.toString(16).padStart(64, '0')
+        : padHex(a)            // address
+    ).join('');
+  }
+
+  // ─── Contract interactions ───────────────────────────────────────────────────
+  // sendTx is only used by the wrap flow which needs MetaMask on Injective.
+  // Switch to Injective just-in-time so signing stays on Ethereum.
+  async function ensureInjective() {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x6F0' }], // 1776
+      });
+    } catch (sw) {
+      if (sw.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x6F0', chainName: 'Injective EVM',
+            rpcUrls: ['https://sentry.evm-rpc.injective.network'],
+            blockExplorerUrls: ['https://blockscout.injective.network'],
+            nativeCurrency: { name: 'Injective', symbol: 'INJ', decimals: 18 },
+          }],
+        });
+      } else {
+        throw sw;
+      }
+    }
+  }
+
+  async function sendTx(to, data) {
+    await ensureInjective(); // wrap txs need MetaMask on Injective EVM
+    return window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: addr, to, data }],
+    });
+  }
+
+  async function waitForReceipt(txHash, timeoutMs = 90000) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 2500));
+      // Poll directly against Injective RPC so MetaMask network doesn't matter.
+      const receipt = await injectiveRPC('eth_getTransactionReceipt', [txHash]).catch(() => null);
+      if (receipt) return receipt;
+    }
+    throw new Error('Transaction timed out after 90s');
+  }
+
+  async function getAllowance() {
+    // allowance(address owner, address spender) → 0xdd62ed3e
+    const data = '0xdd62ed3e'
+      + addr.slice(2).padStart(64, '0')
+      + CFG.wusdtAddress.slice(2).padStart(64, '0');
+    const raw = await ethCall(USDT_ADDRESS, data);
+    return BigInt(raw);
+  }
+
+  // ─── Main wrap/unwrap dispatcher ────────────────────────────────────────────
+  function doAction() {
+    if (wrapDirection === 'wrap') doWrap(); else doUnwrap();
+  }
+
+  async function doWrap() {
+    const rawAmt = parseFloat(document.getElementById('wrap-amount-input').value);
+    if (!rawAmt || rawAmt <= 0) { alert('Enter an amount to wrap.'); return; }
+
+    const amount = BigInt(Math.round(rawAmt * 1_000_000)); // 6 decimals
+    document.getElementById('do-wrap-btn').disabled = true;
+    resetWrapSteps();
+
+    try {
+      // ── Step 1: Approve (skip if already sufficient) ────────────────────────
+      const existing = await getAllowance();
+      if (existing >= amount) {
+        setWrapStep(1, 'done', '✅ Already approved — skipping');
+      } else {
+        setWrapStep(1, 'active', 'Waiting for MetaMask signature…');
+        const approveTx = await sendTx(
+          USDT_ADDRESS,
+          encodeCall('0x095ea7b3', CFG.wusdtAddress, amount)
+        );
+        setWrapStep(1, 'active', 'Confirming on-chain… (' + shortHash(approveTx) + ')');
+        const approveReceipt = await waitForReceipt(approveTx);
+        if (approveReceipt.status !== '0x1') throw new Error('Approve transaction reverted');
+        setWrapStep(1, 'done', '✅ Approved · ' + shortHash(approveTx));
+      }
+
+      // ── Step 2: Deposit ──────────────────────────────────────────────────────
+      setWrapStep(2, 'active', 'Waiting for MetaMask signature…');
+      const depositTx = await sendTx(CFG.wusdtAddress, encodeCall('0xb6b55f25', amount));
+      setWrapStep(2, 'active', 'Confirming on-chain… (' + shortHash(depositTx) + ')');
+      const depositReceipt = await waitForReceipt(depositTx);
+      if (depositReceipt.status !== '0x1') throw new Error('Deposit transaction reverted');
+      setWrapStep(2, 'done', '✅ Wrapped! · ' + shortHash(depositTx));
+
+      await Promise.all([refreshUsdtBalance(), refreshWusdtBalance()]);
+      document.getElementById('do-wrap-btn').disabled = false;
+      document.getElementById('do-wrap-btn').textContent = '🎉 Wrap more USDT';
+
+    } catch (e) {
+      handleWrapError(e);
+    }
+  }
+
+  async function doUnwrap() {
+    const rawAmt = parseFloat(document.getElementById('wrap-amount-input').value);
+    if (!rawAmt || rawAmt <= 0) { alert('Enter an amount to unwrap.'); return; }
+
+    const amount = BigInt(Math.round(rawAmt * 1_000_000));
+    document.getElementById('do-wrap-btn').disabled = true;
+    resetWrapSteps();
+
+    try {
+      // Single step: withdraw(uint256 amount) — selector 0x2e1a7d4d
+      setWrapStep(2, 'active', 'Waiting for MetaMask signature…');
+      const withdrawTx = await sendTx(CFG.wusdtAddress, encodeCall('0x2e1a7d4d', amount));
+      setWrapStep(2, 'active', 'Confirming on-chain… (' + shortHash(withdrawTx) + ')');
+      const receipt = await waitForReceipt(withdrawTx);
+      if (receipt.status !== '0x1') throw new Error('Withdraw transaction reverted');
+      setWrapStep(2, 'done', '✅ Unwrapped! · ' + shortHash(withdrawTx));
+
+      await Promise.all([refreshUsdtBalance(), refreshWusdtBalance()]);
+      document.getElementById('do-wrap-btn').disabled = false;
+      document.getElementById('do-wrap-btn').textContent = '🎉 Unwrap more WUSDT';
+
+    } catch (e) {
+      handleWrapError(e);
+    }
+  }
+
+  function handleWrapError(e) {
+    if (e.code === 4001) {
+      setWrapStep(1, 'error', '✕ Cancelled in MetaMask');
+      setWrapStep(2, 'error', '');
+    } else {
+      console.error('wrap/unwrap error:', e);
+      ['wstep-1','wstep-2'].forEach(id => {
+        if (document.getElementById(id).classList.contains('active')) {
+          document.getElementById(id + '-sub').textContent = '✕ ' + (e.message || 'Error');
+          document.getElementById(id).classList.replace('active', 'error');
+        }
+      });
+    }
+    document.getElementById('do-wrap-btn').disabled = false;
+  }
+
+  function shortHash(h) { return h.slice(0, 8) + '…' + h.slice(-4); }
+
+  // ─── Chat ────────────────────────────────────────────────────────────────────
+  function suggest(text) {
+    document.getElementById('q-input').value = text;
+    handleSend();
+  }
+
+  async function handleSend() {
+    const input    = document.getElementById('q-input');
+    const question = input.value.trim();
+    if (!question || busy) return;
+
+    if (!addr) { await connectWallet(); if (!addr) return; }
+
+    input.value = '';
+    autoGrow(input);
+    busy = true;
+    document.getElementById('send-btn').disabled = true;
+    document.getElementById('welcome')?.remove();
+
+    appendMsg('user', question);
+    const typingEl = appendTyping();
+
+    try {
+      // Pre-flight: check WUSDT balance before even hitting the server
+      const wusdtBal = await refreshWusdtBalance();
+      if (wusdtBal < 10000n) {
+        typingEl.remove();
+        busy = false;
+        document.getElementById('send-btn').disabled = false;
+        appendMsg('err', `You need at least 0.01 WUSDT to ask a question. You currently have ${(Number(wusdtBal)/1e6).toFixed(2)} WUSDT. Click "🔄 Wrap USDT" to convert your USDT.`);
+        return;
+      }
+
+      let resp = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question }),
+      });
+
+      if (resp.status === 402) {
+        showPayOverlay('Sign in MetaMask', 'Approve the $0.01 WUSDT payment to continue');
+
+        const hdr = resp.headers.get('payment-required');
+        if (!hdr) throw new Error('Missing PAYMENT-REQUIRED header');
+
+        const reqs = JSON.parse(atob(hdr));
+        const req  = Array.isArray(reqs) ? reqs[0] : reqs;
+        const paymentHeader = await buildPaymentHeader(req);
+
+        updatePayOverlay('Settling on-chain…', 'Verifying & submitting to Injective EVM');
+
+        resp = await fetch('/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'PAYMENT': paymentHeader },
+          body: JSON.stringify({ question }),
+        });
+
+        hidePayOverlay();
+      }
+
+      typingEl.remove();
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.message || err.error || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      appendMsg('ai', data.answer, { txHash: data.txHash, amount: data.amountPaid });
+      await refreshWusdtBalance();
+
+    } catch (e) {
+      typingEl.remove();
+      hidePayOverlay();
+      appendMsg('err', e.code === 4001 ? 'Payment signature cancelled.' : (e.message || 'An error occurred.'));
+    } finally {
+      busy = false;
+      document.getElementById('send-btn').disabled = false;
+    }
+  }
+
+  // ─── Payment signing ─────────────────────────────────────────────────────────
+  async function buildPaymentHeader(req) {
+    // Ensure we're on Injective (MetaMask requires domain.chainId === active chainId)
+    await ensureInjective();
+
+    // Verify chain actually switched
+    const mmChainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const actualChain = parseInt(mmChainId, 16);
+    if (actualChain !== 1776) {
+      throw new Error(`MetaMask is on chain ${actualChain}, not Injective (1776). Please switch manually in MetaMask.`);
+    }
+
+    const currentAccounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const signingAddr = currentAccounts[0];
+    if (!signingAddr) throw new Error('No MetaMask account available for signing');
+
+    const now   = Math.floor(Date.now() / 1000);
+    const nonce = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                         .map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // EIP712Domain MUST be included — MetaMask infers it incorrectly if omitted,
+    // producing a domain separator that doesn't match the on-chain contract.
+    const TYPES = {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'version', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+      TransferWithAuthorization: [
+        { name: 'from', type: 'address' }, { name: 'to',         type: 'address'  },
+        { name: 'value', type: 'uint256' }, { name: 'validAfter', type: 'uint256' },
+        { name: 'validBefore', type: 'uint256' }, { name: 'nonce', type: 'bytes32' },
+      ],
+    };
+    const DOMAIN = { name: CFG.wusdtName, version: '2', chainId: CFG.chainId, verifyingContract: req.asset };
+
+    const message = {
+      from: signingAddr, to: req.payTo,
+      value: req.maxAmountRequired,
+      validAfter:  String(now - 10),
+      validBefore: String(now + (req.maxTimeoutSeconds || 120)),
+      nonce,
+    };
+
+    let sig;
+    try {
+      sig = await window.ethereum.request({
+        method: 'eth_signTypedData_v4',
+        params: [signingAddr, JSON.stringify({ domain: DOMAIN, types: TYPES, primaryType: 'TransferWithAuthorization', message })],
+      });
+    } catch (e) {
+      if (e.code === 4001) throw e;
+      throw new Error('Signing failed: ' + (e.message || String(e)));
+    }
+
+    return btoa(JSON.stringify({ signature: sig, authorization: message }));
+  }
+
+  // ─── DOM helpers ─────────────────────────────────────────────────────────────
+  function appendMsg(type, text, meta = null) {
+    const chat = document.getElementById('chat');
+    const div  = document.createElement('div');
+    div.className = 'msg ' + type;
+    const icon = type === 'user' ? '👤' : type === 'ai' ? '🤖' : '⚠️';
+    let body = `<div class="bubble">${fmt(text)}</div>`;
+    if (type === 'ai' && meta?.txHash) {
+      const short = meta.txHash.slice(0, 10) + '…' + meta.txHash.slice(-6);
+      body += `<div class="receipt">✅ ${meta.amount || '0.01 WUSDT'} paid via x402
+        <a href="https://blockscout.injective.network/tx/${meta.txHash}" target="_blank" rel="noopener">${short} ↗</a>
+      </div>`;
+    }
+    div.innerHTML = `<div class="avatar">${icon}</div><div class="msg-body">${body}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function appendTyping() {
+    const chat = document.getElementById('chat');
+    const div  = document.createElement('div');
+    div.className = 'msg ai';
+    div.innerHTML = `<div class="avatar">🤖</div><div class="msg-body"><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function fmt(raw) {
+    const el = document.createElement('div');
+    el.textContent = raw;
+    return el.innerHTML
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,     '<em>$1</em>')
+      .replace(/`([^`]+)`/g,     '<code>$1</code>')
+      .replace(/\n/g,            '<br>');
+  }
+
+  // ─── Pay overlay ─────────────────────────────────────────────────────────────
+  function showPayOverlay(t, d)   { document.getElementById('overlay-title').textContent = t; document.getElementById('overlay-desc').textContent = d; document.getElementById('pay-overlay').classList.add('show'); }
+  function updatePayOverlay(t, d) { document.getElementById('overlay-title').textContent = t; document.getElementById('overlay-desc').textContent = d; }
+  function hidePayOverlay()       { document.getElementById('pay-overlay').classList.remove('show'); }
+
+  // ─── Input ───────────────────────────────────────────────────────────────────
+  function autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
+
+  const qInput = document.getElementById('q-input');
+  qInput.addEventListener('input', () => autoGrow(qInput));
+  qInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
+
+  // ─── MetaMask events ─────────────────────────────────────────────────────────
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', accounts => {
+      addr = accounts[0] || null;
+      if (addr) { refreshWalletUI(); Promise.all([refreshWusdtBalance(), refreshUsdtBalance()]); }
+    });
+    // Don't reload on chainChanged — we switch chains intentionally (Injective ↔ Ethereum)
+    // during the payment and wrap flows, and a reload would kill those flows.
+    // Balance reads use direct Injective RPC so MetaMask's chain doesn't affect them.
+    window.ethereum.on('chainChanged', (chainId) => {
+      console.log('[x402] MetaMask chain changed to', parseInt(chainId, 16));
+    });
+  }
+</script>
+</body>
+</html>
