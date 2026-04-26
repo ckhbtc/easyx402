@@ -154,9 +154,34 @@ export async function gatherContext(
   }
 
   // ── 4. Per-ticker deep-dives ─────────────────────────────────────────────
-  // Also fetch LCD markets if we need orderbooks (need market_id)
+  // Lazy-load LCD markets for market params (oracle, margins, market_id)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let lcdMarkets: any[] | null = null;
+
+  async function getLcdMarkets() {
+    if (!lcdMarkets) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res = (await lcdGet(
+          "/injective/exchange/v1beta1/derivative/markets?status=Active"
+        )) as { markets: unknown[] };
+        lcdMarkets = res.markets as unknown[];
+      } catch {
+        lcdMarkets = [];
+      }
+    }
+    return lcdMarkets;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function findLcdMarket(markets: any[], ticker: string) {
+    return markets.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (m: any) =>
+        m.market?.ticker?.startsWith(ticker + "/") ||
+        m.market?.ticker?.startsWith(ticker + " ")
+    );
+  }
 
   for (const ticker of tickers) {
     // Find in aggregator data (ticker format: "BTC/USDT PERP")
@@ -173,7 +198,30 @@ export async function gatherContext(
       ctx[`${ticker}_note`] = `No active ${ticker} perpetual market found`;
     }
 
-    // Orderbook — fetch from LCD using market_id
+    // Always fetch LCD market data for oracle info, margin params, etc.
+    const markets = await getLcdMarkets();
+    const lcdMarket = findLcdMarket(markets, ticker);
+
+    if (lcdMarket?.market) {
+      const m = lcdMarket.market;
+      ctx[`${ticker}_marketParams`] = {
+        marketId:            m.market_id,
+        ticker:              m.ticker,
+        oracleType:          m.oracle_type,
+        oracleBase:          m.oracle_base,
+        oracleQuote:         m.oracle_quote,
+        oracleScaleFactor:   m.oracle_scale_factor,
+        initialMarginRatio:  m.initial_margin_ratio,
+        maintenanceMarginRatio: m.maintenance_margin_ratio,
+        makerFeeRate:        m.maker_fee_rate,
+        takerFeeRate:        m.taker_fee_rate,
+        minPriceTickSize:    m.min_price_tick_size,
+        minQuantityTickSize: m.min_quantity_tick_size,
+        status:              m.status,
+      };
+    }
+
+    // Orderbook — fetch using market_id
     const wantsOrderbook =
       q.includes("orderbook") ||
       q.includes("order book") ||
@@ -183,51 +231,27 @@ export async function gatherContext(
       q.includes("ask") ||
       q.includes("spread");
 
-    if (wantsOrderbook) {
-      // Lazy-load LCD markets to get market IDs
-      if (!lcdMarkets) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const res = (await lcdGet(
-            "/injective/exchange/v1beta1/derivative/markets?status=Active"
-          )) as { markets: unknown[] };
-          lcdMarkets = res.markets as unknown[];
-        } catch {
-          lcdMarkets = [];
-        }
-      }
-
-      // Find the matching LCD market for the market_id
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const lcdMarket = (lcdMarkets as any[]).find(
+    if (wantsOrderbook && lcdMarket?.market?.market_id) {
+      try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (m: any) =>
-          m.market?.ticker?.startsWith(ticker + "/") ||
-          m.market?.ticker?.startsWith(ticker + " ")
-      );
-
-      if (lcdMarket?.market?.market_id) {
-        try {
+        const ob = (await lcdGet(
+          `/injective/exchange/v1beta1/derivative/orderbook/${lcdMarket.market.market_id}`
+        )) as { buys_price_level?: unknown[]; sells_price_level?: unknown[] };
+        ctx[`${ticker}_orderbook`] = {
+          note: "Prices are raw (divide by 1,000,000 for USD). Quantities are in base units.",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ob = (await lcdGet(
-            `/injective/exchange/v1beta1/derivative/orderbook/${lcdMarket.market.market_id}`
-          )) as { buys_price_level?: unknown[]; sells_price_level?: unknown[] };
-          ctx[`${ticker}_orderbook`] = {
-            note: "Prices are raw (divide by 1,000,000 for USD). Quantities are in base units.",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            bids: (ob.buys_price_level ?? []).slice(0, 5).map((b: any) => ({
-              price:    b.p,
-              quantity: b.q,
-            })),
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            asks: (ob.sells_price_level ?? []).slice(0, 5).map((s: any) => ({
-              price:    s.p,
-              quantity: s.q,
-            })),
-          };
-        } catch (e) {
-          ctx[`${ticker}_orderbook_error`] = String(e);
-        }
+          bids: (ob.buys_price_level ?? []).slice(0, 5).map((b: any) => ({
+            price:    b.p,
+            quantity: b.q,
+          })),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          asks: (ob.sells_price_level ?? []).slice(0, 5).map((s: any) => ({
+            price:    s.p,
+            quantity: s.q,
+          })),
+        };
+      } catch (e) {
+        ctx[`${ticker}_orderbook_error`] = String(e);
       }
     }
   }
