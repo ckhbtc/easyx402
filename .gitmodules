@@ -1,0 +1,3 @@
+[submodule "vendor/x402"]
+	path = vendor/x402
+	url = https://github.com/InjectiveLabs/x402.git
